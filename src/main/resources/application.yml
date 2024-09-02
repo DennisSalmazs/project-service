@@ -17,12 +17,12 @@ server:
   port: 8082
 
 keycloak:
-  realm: cydeo-dev
+  realm: teambridge-dev
   auth-server-url: http://localhost:8080/auth
   ssl-required: none
-  resource: ticketing-app
+  resource: teambridge-app
   credentials:
-    secret: yBoinzPIKLwo6dcsS3tvfRBmX8lZfUmn
+    secret: tTeFCXqtl8exgvJSnYFIDKFHYWWAKbIq
   use-resource-role-mappings: true
   bearer-only: true
 
