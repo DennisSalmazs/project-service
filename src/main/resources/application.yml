@@ -1,0 +1,34 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/project-db
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+    initialization-mode: always
+
+server:
+  port: 8082
+
+keycloak:
+  realm: cydeo-dev
+  auth-server-url: http://localhost:8080/auth
+  ssl-required: none
+  resource: ticketing-app
+  credentials:
+    secret: yBoinzPIKLwo6dcsS3tvfRBmX8lZfUmn
+  use-resource-role-mappings: true
+  bearer-only: true
+
+master:
+  user:
+    username: admin
+    password: admin
+  realm: master
+  client: master-client
