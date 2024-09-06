@@ -1,0 +1,4 @@
+[ ERROR] [10214] [2024-09-02 20:45:11.530] [http-nio-8082-exec-2] [com.teambridge.exception.GlobalExceptionHandler] - "Access is denied"
+[ ERROR] [10214] [2024-09-02 20:45:30.545] [http-nio-8082-exec-3] [com.teambridge.exception.GlobalExceptionHandler] - "Access is denied"
+[ ERROR] [10214] [2024-09-02 20:49:47.136] [http-nio-8082-exec-5] [com.teambridge.exception.GlobalExceptionHandler] - "Access is denied"
+[ ERROR] [10214] [2024-09-02 20:50:09.488] [http-nio-8082-exec-7] [com.teambridge.exception.GlobalExceptionHandler] - "Access is denied"
