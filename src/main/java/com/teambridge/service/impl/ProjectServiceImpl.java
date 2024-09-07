@@ -1,20 +1,19 @@
 package com.teambridge.service.impl;
 
+import com.teambridge.client.TaskClient;
 import com.teambridge.dto.ProjectDTO;
+import com.teambridge.dto.TaskResponse;
 import com.teambridge.entity.Project;
 import com.teambridge.enums.Status;
-import com.teambridge.exception.ProjectAccessDeniedException;
-import com.teambridge.exception.ProjectAlreadyExistsException;
-import com.teambridge.exception.ProjectIsCompletedException;
-import com.teambridge.exception.ProjectNotFoundException;
+import com.teambridge.exception.*;
 import com.teambridge.repository.ProjectRepository;
 import com.teambridge.service.KeycloakService;
 import com.teambridge.service.ProjectService;
 import com.teambridge.util.MapperUtil;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,11 +22,15 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final MapperUtil mapperUtil;
     private final KeycloakService keycloakService;
+    private final TaskClient taskClient;
 
-    public ProjectServiceImpl(ProjectRepository projectRepository, MapperUtil mapperUtil, KeycloakService keycloakService) {
+    public ProjectServiceImpl(ProjectRepository projectRepository,
+                              MapperUtil mapperUtil,
+                              KeycloakService keycloakService, TaskClient taskClient) {
         this.projectRepository = projectRepository;
         this.mapperUtil = mapperUtil;
         this.keycloakService = keycloakService;
+        this.taskClient = taskClient;
     }
 
     @Override
@@ -196,24 +199,40 @@ public class ProjectServiceImpl implements ProjectService {
 
     }
 
+    // retrieve completed and non-completed task counts, from task service
     private ProjectDTO retrieveProjectDetails(Project project) {
+        ProjectDTO projectDTO = mapperUtil.convert(project, new ProjectDTO());
+        ResponseEntity<TaskResponse> taskResponse = taskClient.getCountsByProject(project.getProjectCode());
 
-        //TODO Retrieve the completed and non-completed task counts from task-service
+        if (Objects.requireNonNull(taskResponse.getBody()).isSuccess()) {
+            Map<String, Integer> taskCounts = taskResponse.getBody().getData();
 
-        return new ProjectDTO();
+            Integer completedTaskCount = taskCounts.get("completedTaskCount");
+            Integer nonCompletedTaskCount = taskCounts.get("nonCompletedTaskCount");
 
+            projectDTO.setCompletedTaskCount(completedTaskCount);
+            projectDTO.setNonCompletedTaskCount(nonCompletedTaskCount);
+        } else {
+            throw new ProjectDetailsNotRetrievedException("Project details cannot be retrieved.");
+        }
+
+        return projectDTO;
     }
 
+    // when completing a project, complete all non-completed tasks linked to that project as well, from task service
     private void completeRelatedTasks(String projectCode) {
-
-        //TODO Send a request to task-service to complete all the tasks of a certain project
-
+        ResponseEntity<TaskResponse> response = taskClient.completeByProject(projectCode);
+        if (!Objects.requireNonNull(response.getBody()).isSuccess()) {
+            throw new TasksCanNotBeCompletedException("Task of project " + projectCode + " cannot be completed");
+        }
     }
 
+    // when deleting a project, delete all tasks linked to that project as well, from task service
     private void deleteRelatedTasks(String projectCode) {
-
-        //TODO Send a request to task-service to delete all the tasks of a certain project
-
+        ResponseEntity<TaskResponse> response = taskClient.deleteByProject(projectCode);
+        if (!Objects.requireNonNull(response.getBody()).isSuccess()) {
+            throw new TasksCanNotBeDeletedException("Task of project " + projectCode + " cannot be deleted");
+        }
     }
 
 }
