@@ -1,6 +1,10 @@
 spring:
   application:
     name: project-service
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
   jpa:
     properties:
       hibernate:
